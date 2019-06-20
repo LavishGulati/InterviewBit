@@ -3,47 +3,43 @@ typedef pair<int, int> pii;
 #define s second
 #define mp make_pair
 
+int gcd(int a, int b){
+    if(a == 0) return b;
+    if(b == 0) return a;
+    if(a < 0) return gcd(-1*a, b);
+    if(b < 0) return gcd(a, -1*b);
+    if(a > b) return gcd(b, a);
+    return gcd(b%a, a);
+}
+
 int Solution::maxPoints(vector<int> &X, vector<int> &Y) {
-    map< double, set<int> > m;
+    map<pii, int> m;
+    int answer = 0;
+    
     int n = X.size();
-    
-    if(n == 1) return 1;
-    
-    double slope;
+    int same, CurMax, a, b, x;
     for(int i = 0; i < n; i++){
+        m.clear();
+        same = 1;
+        CurMax = 0;
         for(int j = i+1; j < n; j++){
-            if(X[i]-X[j] == 0) slope = INT_MAX;
-            else slope = abs((double(Y[i])-double(Y[j]))/(double(X[i])-double(X[j])));
-            
-            m[slope].insert(i);
-            m[slope].insert(j);
+            a = X[i]-X[j];
+            b = Y[i]-Y[j];
+            if(a == 0 && b == 0){
+                same++;
+                continue;
+            }
+            if(a < 0){
+                a *= -1;
+                b *= -1;
+            }
+            x = gcd(a, b);
+            m[mp(a/x, b/x)]++;
+            CurMax = max(CurMax, m[mp(a/x, b/x)]);
         }
+        CurMax += same;
+        answer = max(answer, CurMax);
     }
     
-    // int MaxSize = 0;
-    // for(auto i = m.begin(); i != m.end(); i++){
-    //     MaxSize = max(MaxSize, int((i->s).size()));
-    // }
-    
-    map<double, int> helper;
-    double c;
-    int MaxSize = 0;
-    for(auto i = m.begin(); i != m.end(); i++){
-        slope = i->f;
-        for(auto j = (i->s).begin(); j != (i->s).end(); j++){
-            if(slope == 0) c = Y[*j];
-            else if(slope != INT_MAX) c = X[*j] - Y[*j]/slope;
-            else c = X[*j];
-            helper[c]++;
-            // if(slope == 0) cout << c << " ";
-        }
-        // if(slope == 0) cout << endl;
-        for(auto j = helper.begin(); j != helper.end(); j++){
-            MaxSize = max(MaxSize, j->s);
-        }
-        helper.clear();
-        // if(slope == 0) cout << slope << " " << MaxSize << endl;
-    }
-    
-    return MaxSize;
+    return answer;
 }
