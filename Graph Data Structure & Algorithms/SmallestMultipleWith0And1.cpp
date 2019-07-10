@@ -1,58 +1,59 @@
-class state{
-public:
-    int prev;
-    bool x;
-    
-    state(){
-        
-    }
-    
-    state(int prev, bool x){
-        this->prev = prev;
-        this->x = x;
-    }
-};
+typedef long long ll;
+#define all(x) x.begin(), x.end()
 
-string BuildAnswer(int cur, state *helper){
-    if(cur == 1){
-        return "1";
-    }
+vector<int> flag, parent, val;
+
+string solve(int n){
+    int p, q, i, total = 0;
     
-    char c = (helper[cur].x == false) ? '0' : '1';
-    return BuildAnswer(helper[cur].prev, helper)+c;
+    string output = "";
+    queue<int> myq;
+    int temp = 1%n;
+    flag[temp] = 1;
+    val[temp] = 1;
+    myq.push(temp);
+    
+    while(1){
+        temp = myq.front();
+        myq.pop();
+        p = temp;
+        
+        if(p == 0){
+            p = 0;
+            output += char(val[p]+'0');
+            p = parent[p];
+            while(p != 0){
+                output += char(val[p]+'0');
+                p = parent[p];
+            }
+            reverse(all(output));
+            return output;
+        }
+        
+        q = (p*10)%n;
+        if(flag[q] == 0){
+            myq.push(q);
+            flag[q] = 1;
+            parent[q] = p;
+            val[q] = 0;
+        }
+        q++;
+        if(q >= n) q -= n;
+        if(flag[q] == 0){
+            myq.push(q);
+            flag[q] = 1;
+            parent[q] = p;
+            val[q] = 1;
+        }
+    }
 }
 
 string Solution::multiple(int A) {
-    if(A == 1) return "1";
-    
-    state *helper = new state[A];
-    helper[1] = state(-1, true);
-    
-    bool IsVisited[A];
-    for(int i = 0; i < A; i++) IsVisited[i] = false;
-    
-    queue<int> q;
-    q.push(1);
-    IsVisited[1] = true;
-    int x, cur;
-    while(!q.empty()){
-        x = q.front();
-        q.pop();
-        cur = (x*10)%A;
-        if(!IsVisited[cur]){
-            q.push(cur);
-            IsVisited[cur] = true;
-            helper[cur] = state(x, false);
-            if(cur == 0) break;
-        }
-        cur = (x*10+1)%A;
-        if(!IsVisited[cur]){
-            q.push(cur);
-            IsVisited[cur] = true;
-            helper[cur] = state(x, true);
-            if(cur == 0) break;
-        }
-    }
-    
-    return BuildAnswer(0, helper);
+    flag.clear();
+    parent.clear();
+    val.clear();
+    flag.resize(A);
+    val.resize(A);
+    parent.resize(A);
+    return solve(A);
 }
